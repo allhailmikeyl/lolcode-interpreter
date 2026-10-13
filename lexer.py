@@ -5,6 +5,9 @@
 # Each matcher is match_x(source, pos): return None if nothing starts at pos, else ([(lexeme, classification)], new_pos)
 
 # LexerError is raised when the lexer cannot read the input
+import re # for regular expressions
+
+
 class LexerError(Exception):
     def __init__(self, message, line):
         Exception.__init__(self, message)
@@ -12,9 +15,18 @@ class LexerError(Exception):
         self.line = line # The line number where it went wrong
 
 # List of Literals and Keywords with their corresponding Classification
-TROOF_LITERALS = [] # TODO (Phia): (lexeme, classification) for WIN and FAIL
+TROOF_LITERALS = [
+    ("WIN", "TROOF Literal"),
+    ("FAIL", "TROOF Literal")
+] # TODO (Phia): (lexeme, classification) for WIN and FAIL
 
-TYPE_LITERALS = [] # TODO (Phia): (lexeme, classification) for NOOB, NUMBR, NUMBAR, YARN, TROOF
+TYPE_LITERALS = [
+    ("NOOB", "Type Literal"),
+    ("NUMBR", "Type Literal"),
+    ("NUMBAR", "Type Literal"),
+    ("YARN", "Type Literal"),
+    ("TROOF", "Type Literal")
+] # TODO (Phia): (lexeme, classification) for NOOB, NUMBR, NUMBAR, YARN, TROOF
 
 SINGLE_WORD_KEYWORDS = [
     ("HAI", "Code Block Delimiter"),
@@ -123,14 +135,40 @@ def match_string(source, pos):
 
 # TODO (Phia): NUMBAR first (3.14), then NUMBR (12); both can start with -
 def match_number(source, pos):
-    return None
+    # check NUMBAR/float nummbers first so the decimal point isn't split from the integer part
+    numbar_match = re.match(r'^-?\d+\.\d+', source[pos:])  
+    if numbar_match:
+        lexeme = numbar_match.group(0)  # extract matched text 
+        end = pos + len(lexeme)          
+        if is_boundary(source, end):    # ensure the number ends at a valid separator
+            return ([(lexeme, "NUMBAR Literal")], end)
+
+    # check NUMBR/integers second if NUMBAR did not match
+    numbr_match = re.match(r'^-?\d+', source[pos:])  
+    if numbr_match:
+        lexeme = numbr_match.group(0)  
+        end = pos + len(lexeme)          
+        if is_boundary(source, end):   
+            return ([(lexeme, "NUMBR Literal")], end)
+
+    return None  
 
 # TODO (Phia): WIN, FAIL (check the word boundary so WINNER is not WIN)
 def match_troof(source, pos):
-    return None
+    for lexeme, classification in TROOF_LITERALS:
+        end = pos + len(lexeme)  # to calculate the end position for the target literal
+        
+        if source[pos:end] == lexeme and is_boundary(source, end): # check if the text matches the exact lexeme and ends at a word boundary
+            return ([(lexeme, classification)], end)
+    return None  
 
 # TODO (Phia): NOOB, NUMBR, NUMBAR, YARN, TROOF
 def match_type(source, pos):
+    for lexeme, classification in TYPE_LITERALS:
+        end = pos + len(lexeme)  # to calculate end position for the target type keyword
+        
+        if source[pos:end] == lexeme and is_boundary(source, end): 
+            return ([(lexeme, classification)], end)
     return None
 
 # TODO (Samuel)
@@ -230,5 +268,3 @@ def tokenize(source):
         pos = new_pos # Move to the next unread character
 
     return tokens
-
-# phia: test
