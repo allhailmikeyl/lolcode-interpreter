@@ -4,10 +4,10 @@
 # It checks only what each piece is, not whether the order is valid 
 # Each matcher is match_x(source, pos): return None if nothing starts at pos, else ([(lexeme, classification)], new_pos)
 
-# LexerError is raised when the lexer cannot read the input
+# Imports
 import re # for regular expressions
 
-
+# LexerError is raised when the lexer cannot read the input
 class LexerError(Exception):
     def __init__(self, message, line):
         Exception.__init__(self, message)
