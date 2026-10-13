@@ -16,7 +16,26 @@ TROOF_LITERALS = [] # TODO (Phia): (lexeme, classification) for WIN and FAIL
 
 TYPE_LITERALS = [] # TODO (Phia): (lexeme, classification) for NOOB, NUMBR, NUMBAR, YARN, TROOF
 
-SINGLE_WORD_KEYWORDS = [] # TODO (Samuel): fill with (lexeme, classification) for every one-word keyword
+SINGLE_WORD_KEYWORDS = [
+    ("HAI", "Code Block Delimiter"),
+    ("KTHXBYE", "Code Block Delimiter"),
+    ("ITZ", "Variable Initialization"),
+    ("R", "Assignment Operator"),
+    ("NOT", "Boolean Operator"),
+    ("DIFFRINT", "Comparison Operator"),
+    ("SMOOSH", "String Concatenation"),
+    ("MAEK", "Typecast Keyword"),
+    ("A", "Typecast Keyword"),
+    ("VISIBLE", "Output Keyword"),
+    ("GIMMEH", "Input Keyword"),
+    ("MEZZAGE", "Print Keyword"),
+    ("MEBBE", "If-Else Keyword"),
+    ("OMG", "Switch Case"),
+    ("OMGWTF", "Switch Default"),
+    ("GTFO", "Break Keyword"),
+    ("MKAY", "Expression Delimiter"),
+    ("AN", "Operand Separator"),
+]
 
 MULTI_WORD_KEYWORDS = [
     ("I HAS A", "Variable Declaration"),
@@ -114,17 +133,48 @@ def match_troof(source, pos):
 def match_type(source, pos):
     return None
 
-# TODO (Samuel): BTW ... to the end of the line, and OBTW ... TLDR across lines
+# TODO (Samuel)
 def match_comment(source, pos):
+    # Single line comment
+    if source[pos:].startswith("BTW") and is_boundary(source, pos + 3):
+        end = pos + 3
+        while end < len(source) and source[end] != "\n":
+            end += 1
+        return ([], end)
+
+    # Multiline comment
+    if source[pos:].startswith("OBTW") and is_boundary(source, pos + 4):
+        # Look for matching TLDR after OBTW
+        tldr_pos = source.find("TLDR", pos + 4)
+        if tldr_pos != -1 and is_boundary(source, tldr_pos + 4):
+            return ([], tldr_pos + 4)
+        else:
+            return ([], len(source))
+
     return None
 
 # TODO (Samuel): read one whole word (letters, digits, underscores), then check it against SINGLE_WORD_KEYWORDS
 def match_keyword(source, pos):
+    for keyword, classification in SINGLE_WORD_KEYWORDS:
+        end = pos + len(keyword)
+        if source[pos:end] == keyword and is_boundary(source, end):
+            return ([(keyword, classification)], end)
+
     return None
 
 # TODO (Samuel): a letter followed by letters, digits, or underscores
 def match_identifier(source, pos):
-    return None
+    # Identifiers must start with a letter
+    if not source[pos].isalpha():
+        return None
+
+    end = pos + 1
+    # Can contain letters, digits, or underscores
+    while end < len(source) and (source[end].isalnum() or source[end] == "_"):
+        end += 1
+
+    lexeme = source[pos:end]
+    return ([(lexeme, "Variable Identifier")], end)
 
 # Tries every multi-word keyword at the current position
 def match_multiword_keyword(source, pos):
