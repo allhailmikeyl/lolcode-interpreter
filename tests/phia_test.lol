@@ -1,0 +1,4 @@
+I HAS A num ITZ 12
+I HAS A float ITZ -3.14
+I HAS A flag ITZ WIN
+MAEK num NUMBAR
