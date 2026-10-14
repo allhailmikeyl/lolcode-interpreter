@@ -106,13 +106,19 @@ def is_boundary(source, pos):
 # Skips spaces, tabs, and newlines; produces no tokens
 def match_whitespace(source, pos):
     start = pos # Remember the position where we started
-    while pos < len(source) and source[pos] in " \t\r\n": # Move forward while the current character is whitespace
+    while pos < len(source) and source[pos] in " \t\r": # Move forward while the current character is whitespace
         pos += 1
     
     if pos == start: # If we did not move, there was no whitespace here
         return None
     
     return ([], pos) # Empty token list (nothing to record), but pos moves forward
+
+# Skips a single newline; produces one token for the linebreak
+def match_newline(source, pos):
+    if source[pos] == "\n": # If the current character is a newline, we found a linebreak
+        return ([("\n", "Linebreak")], pos + 1)
+    return None
 
 # Reads a string like and splits it into three tokens: opening quote, the text inside, closing quote
 def match_string(source, pos):
@@ -232,9 +238,17 @@ def match_multiword_keyword(source, pos):
    
     return None  # None of the keywords matched at this position
 
+# VISIBLE operands are separated by a "+" symbol
+def match_plus(source, pos):
+    if source[pos] == "+":
+        return ([("+", "Print Separator")], pos + 1)
+    return None
+
 # The list of matcher functions, in the order they should be tried
 MATCHERS = [
-    match_whitespace,           # skip spaces and newlines
+    match_whitespace,           # skip spaces and tabs
+    match_newline,              # newlines
+    match_plus,                 # + between VISIBLE operands
     match_comment,              # comments (BTW, OBTW...TLDR)
     match_multiword_keyword,    # "I HAS A", "SUM OF", ... before shorter words
     match_string,               # "..." strings
