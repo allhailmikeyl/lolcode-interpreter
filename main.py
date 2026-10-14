@@ -5,7 +5,8 @@
 
 # Imports
 import sys # sys lets us read what the user typed after "python main.py" (the file name)
-from lexer import tokenize, LexerError # tokenize() is the lexer's main function; LexerError is raised on bad input.
+from lexer import tokenize, LexerError # tokenize() is the lexer's main function; LexerError is raised on bad input
+from parser import parse, tree_to_string, ParseError # parse() is the parser's main function; tree_to_string() converts the parse tree to a string
 
 # Main Function
 def main():
@@ -25,6 +26,14 @@ def main():
     except LexerError as e:
         print("Error on line " + str(e.line) + ": " + e.message) # e.line and e.message were set in LexerError (see lexer.py)
         return 
+
+    # Run the parser
+    try:
+        tree = parse(tokens) # parse() takes the list of tokens and returns a parse tree
+    except ParseError as e:
+        print("Syntax error on line " + str(e.line) + ": " + e.message) # e.line and e.message were set in ParseError (see parser.py)
+        return
+    print(tree_to_string(tree))
 
     # Find the longest lexeme
     width = len("Lexeme")
