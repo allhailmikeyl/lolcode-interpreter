@@ -1,5 +1,5 @@
 # CMSC 124 - ST-5L PROJECT
-# For Milestone 2: Lexemes (Lexical Analyzer)
+# For Milestone 1: Lexemes (Lexical Analyzer)
 # It reads a .lol program and cuts it into lexemes (HAI, I HAS A, var, ITZ, 12, ...), each with a label 
 # It checks only what each piece is, not whether the order is valid 
 # Each matcher is match_x(source, pos): return None if nothing starts at pos, else ([(lexeme, classification)], new_pos)
@@ -135,7 +135,7 @@ def match_string(source, pos):
     tokens = [] 
     tokens.append(('"', "String Delimiter")) # Opening quote
     if contents != "": # The text inside (an empty string "" has no Literal row)
-        tokens.append((contents, "Literal"))
+        tokens.append((contents, "String Literal"))
     tokens.append(('"', "String Delimiter")) # Closing quote
 
     return (tokens, end + 1) # Continue reading right after the closing quote
