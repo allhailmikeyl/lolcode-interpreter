@@ -17,9 +17,11 @@ TROOF_LITERALS = [] # TODO (Phia): (lexeme, classification) for WIN and FAIL
 TYPE_LITERALS = [] # TODO (Phia): (lexeme, classification) for NOOB, NUMBR, NUMBAR, YARN, TROOF
 
 SINGLE_WORD_KEYWORDS = [
-    ("HAI", "Code Block Delimiter"),
-    ("KTHXBYE", "Code Block Delimiter"),
-    ("ITZ", "Variable Initialization"),
+    ("HAI", "Code Delimiter"),
+    ("KTHXBYE", "Code Delimiter"),
+    ("WAZZUP", "Variable Declaration Delimiter"),
+    ("BUHBYE", "Variable Declaration Delimiter"),
+    ("ITZ", "Variable Assignment"),
     ("R", "Assignment Operator"),
     ("NOT", "Boolean Operator"),
     ("DIFFRINT", "Comparison Operator"),
@@ -28,11 +30,16 @@ SINGLE_WORD_KEYWORDS = [
     ("A", "Typecast Keyword"),
     ("VISIBLE", "Output Keyword"),
     ("GIMMEH", "Input Keyword"),
-    ("MEZZAGE", "Print Keyword"),
     ("MEBBE", "If-Else Keyword"),
+    ("OIC", "If-Else/Switch Delimiter"),
     ("OMG", "Switch Case"),
     ("OMGWTF", "Switch Default"),
     ("GTFO", "Break Keyword"),
+    ("UPPIN", "Loop Increment"),
+    ("NERFIN", "Loop Decrement"),
+    ("YR", "Loop/Function Parameter Keyword"),
+    ("TIL", "Loop Condition"),
+    ("WILE", "Loop Condition"),
     ("MKAY", "Expression Delimiter"),
     ("AN", "Operand Separator"),
 ]
@@ -133,27 +140,32 @@ def match_troof(source, pos):
 def match_type(source, pos):
     return None
 
-# TODO (Samuel)
 def match_comment(source, pos):
     # Single line comment
-    if source[pos:].startswith("BTW") and is_boundary(source, pos + 3):
+    if source.startswith("BTW", pos) and is_boundary(source, pos + 3):
         end = pos + 3
         while end < len(source) and source[end] != "\n":
             end += 1
         return ([], end)
 
     # Multiline comment
-    if source[pos:].startswith("OBTW") and is_boundary(source, pos + 4):
-        # Look for matching TLDR after OBTW
-        tldr_pos = source.find("TLDR", pos + 4)
-        if tldr_pos != -1 and is_boundary(source, tldr_pos + 4):
-            return ([], tldr_pos + 4)
-        else:
-            return ([], len(source))
+    if source.startswith("OBTW", pos) and is_boundary(source, pos + 4):
+        search = pos + 4
+        while True:
+            tldr_pos = source.find("TLDR", search)
+
+            # No TLDR left in the file, so the comment was never closed
+            if tldr_pos == -1:
+                line = source[:pos].count("\n") + 1 # Line where the OBTW started
+                raise LexerError("OBTW has no matching TLDR", line)
+
+            if source[tldr_pos - 1] in " \t\r\n" and is_boundary(source, tldr_pos + 4):
+                return ([], tldr_pos + 4)
+
+            search = tldr_pos + 1
 
     return None
 
-# TODO (Samuel): read one whole word (letters, digits, underscores), then check it against SINGLE_WORD_KEYWORDS
 def match_keyword(source, pos):
     for keyword, classification in SINGLE_WORD_KEYWORDS:
         end = pos + len(keyword)
@@ -162,7 +174,6 @@ def match_keyword(source, pos):
 
     return None
 
-# TODO (Samuel): a letter followed by letters, digits, or underscores
 def match_identifier(source, pos):
     # Identifiers must start with a letter
     if not source[pos].isalpha():
