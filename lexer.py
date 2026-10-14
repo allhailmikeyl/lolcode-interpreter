@@ -18,7 +18,7 @@ class LexerError(Exception):
 TROOF_LITERALS = [
     ("WIN", "TROOF Literal"),
     ("FAIL", "TROOF Literal")
-] # TODO (Phia): (lexeme, classification) for WIN and FAIL
+]
 
 TYPE_LITERALS = [
     ("NOOB", "Type Literal"),
@@ -26,7 +26,7 @@ TYPE_LITERALS = [
     ("NUMBAR", "Type Literal"),
     ("YARN", "Type Literal"),
     ("TROOF", "Type Literal")
-] # TODO (Phia): (lexeme, classification) for NOOB, NUMBR, NUMBAR, YARN, TROOF
+]
 
 SINGLE_WORD_KEYWORDS = [
     ("HAI", "Code Delimiter"),
@@ -140,7 +140,6 @@ def match_string(source, pos):
 
     return (tokens, end + 1) # Continue reading right after the closing quote
 
-# TODO (Phia): NUMBAR first (3.14), then NUMBR (12); both can start with -
 def match_number(source, pos):
     # check NUMBAR/float nummbers first so the decimal point isn't split from the integer part
     numbar_match = re.match(r'^-?\d+\.\d+', source[pos:])  
@@ -160,7 +159,6 @@ def match_number(source, pos):
 
     return None  
 
-# TODO (Phia): WIN, FAIL (check the word boundary so WINNER is not WIN)
 def match_troof(source, pos):
     for lexeme, classification in TROOF_LITERALS:
         end = pos + len(lexeme)  # to calculate the end position for the target literal
@@ -169,7 +167,6 @@ def match_troof(source, pos):
             return ([(lexeme, classification)], end)
     return None  
 
-# TODO (Phia): NOOB, NUMBR, NUMBAR, YARN, TROOF
 def match_type(source, pos):
     for lexeme, classification in TYPE_LITERALS:
         end = pos + len(lexeme)  # to calculate end position for the target type keyword
