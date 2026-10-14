@@ -4,8 +4,7 @@
 # The UI (ui.py) will do the same thing and show the result in a table (after implementation)
 
 # Imports
-import sys
-from unittest import result # sys lets us read what the user typed after "python main.py" (the file name)
+import sys # sys lets us read what the user typed after "python main.py" (the file name)
 from analyzer import analyze # analyze() runs the lexer, the parser, and the symbol table
 from parser import tree_to_string # tree_to_string() converts the parse tree to text
 
