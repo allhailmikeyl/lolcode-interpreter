@@ -4,9 +4,10 @@
 # The UI (ui.py) will do the same thing and show the result in a table (after implementation)
 
 # Imports
-import sys # sys lets us read what the user typed after "python main.py" (the file name)
-from lexer import tokenize, LexerError # tokenize() is the lexer's main function; LexerError is raised on bad input
-from parser import parse, tree_to_string, ParseError # parse() is the parser's main function; tree_to_string() converts the parse tree to a string
+import sys
+from unittest import result # sys lets us read what the user typed after "python main.py" (the file name)
+from analyzer import analyze # analyze() runs the lexer, the parser, and the symbol table
+from parser import tree_to_string # tree_to_string() converts the parse tree to text
 
 # Main Function
 def main():
@@ -20,33 +21,45 @@ def main():
     with open(sys.argv[1]) as f:
         source = f.read()
 
-    # Run the lexer
-    try:
-        tokens = tokenize(source) # List of (lexeme, classification, line)
-    except LexerError as e:
-        print("Error on line " + str(e.line) + ": " + e.message) # e.line and e.message were set in LexerError (see lexer.py)
-        return 
-
-    # Run the parser
-    try:
-        tree = parse(tokens) # parse() takes the list of tokens and returns a parse tree
-    except ParseError as e:
-        print("Syntax error on line " + str(e.line) + ": " + e.message) # e.line and e.message were set in ParseError (see parser.py)
+    # Run the lexer, the parser, and the symbol table
+    result = analyze(source) # A dictionary with "tokens", "tree", "symbols", and "error" (see analyzer.py)
+    error = result["error"] # None if everything worked, otherwise (kind, line, message)
+ 
+    # If the lexer failed, there are no lexemes to show
+    if error is not None and error[0] == "Lexical error":
+        print(error[0] + " on line " + str(error[1]) + ": " + error[2]) 
         return
-    print(tree_to_string(tree))
 
+    tokens = result["tokens"] # List of (lexeme, classification, line)
+    shown = [t for t in tokens if t[1] != "Linebreak"] # Linebreak tokens are only for the parser, so hide them in the table
+    
     # Find the longest lexeme
     width = len("Lexeme")
-    for lexeme, classification, line in tokens: # Go through every token
-        if len(lexeme) > width:  # Remember the widest lexeme seen so far
+    for lexeme, classification, line in shown: # Go through every token
+        if len(lexeme) > width: # Remember the widest lexeme seen so far
             width = len(lexeme)
-
+ 
     print("Line".ljust(6) + "Lexeme".ljust(width + 2) + "Classification")
     print("-" * (6 + width + 2 + 14))
 
     # Go through the token list and print one row per token
-    for lexeme, classification, line in tokens:
+    for lexeme, classification, line in shown:
         print(str(line).ljust(6) + lexeme.ljust(width + 2) + classification)
     print()
+ 
+    # If the parser failed, there is no tree to show
+    if error is not None:
+        print(error[0] + " on line " + str(error[1]) + ": " + error[2])
+        return
 
+    # Print the parse tree
+    print(tree_to_string(result["tree"]))
+    print()
+
+    # Print the symbol table
+    print("Symbol Table")
+    print("-" * 30)
+    for name, value in result["symbols"]:
+        print(name.ljust(16) + str(value))
+ 
 main()
