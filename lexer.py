@@ -100,8 +100,8 @@ def is_boundary(source, pos):
     
     ch = source[pos] # Look at the character right after the keyword
 
-    # A space, tab, newline, carriage return, or comma ends a keyword
-    return ch == " " or ch == "\t" or ch == "\n" or ch == "\r" or ch == ","
+    # A space, tab, newline, carriage return, comma, or plus sign ends a keyword
+    return ch == " " or ch == "\t" or ch == "\n" or ch == "\r" or ch == "," or ch == "+"
 
 # Skips spaces, tabs, and newlines; produces no tokens
 def match_whitespace(source, pos):
