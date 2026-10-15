@@ -103,7 +103,7 @@ def is_boundary(source, pos):
     # A space, tab, newline, carriage return, comma, or plus sign ends a keyword
     return ch == " " or ch == "\t" or ch == "\n" or ch == "\r" or ch == "," or ch == "+"
 
-# Skips spaces, tabs, and newlines; produces no tokens
+# Skips spaces and tabs; produces no tokens
 def match_whitespace(source, pos):
     start = pos # Remember the position where we started
     while pos < len(source) and source[pos] in " \t\r": # Move forward while the current character is whitespace
@@ -130,9 +130,10 @@ def match_string(source, pos):
     while end < len(source) and source[end] != '"' and source[end] != "\n":
         end += 1
 
-    # No closing quote was found before the line ended so unterminated string
+    # No closing quote was found before the line ended, so the string is unterminated
     if end >= len(source) or source[end] != '"':
-        return None
+        line = source[:pos].count("\n") + 1 # Line where the string started
+        raise LexerError("Unterminated string (missing closing quote)", line)
 
     # The text between the two quotes
     contents = source[pos + 1:end]

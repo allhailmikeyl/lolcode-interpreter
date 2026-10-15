@@ -5,23 +5,23 @@ HAI
     spanning several lines
   TLDR
 
-  BTW variable declarations with each literal type
-  I HAS A num ITZ 17
-  I HAS A pi ITZ 3.14
-  I HAS A neg ITZ -5
-  I HAS A name ITZ "seventeen"
-  I HAS A empty ITZ ""
-  I HAS A flag ITZ WIN
-  I HAS A var_1 ITZ 0
-  I HAS A hair
+  WAZZUP
+    BTW variable declarations with each literal type
+    I HAS A num ITZ 17
+    I HAS A pi ITZ 3.14
+    I HAS A neg ITZ -5
+    I HAS A name ITZ "seventeen"
+    I HAS A empty ITZ ""
+    I HAS A flag ITZ WIN
+    I HAS A var_1 ITZ 0
+    I HAS A hair
+    I HAS A total ITZ SUM OF num AN 3
+  BUHBYE
 
   BTW output, including a keyword inside a string
   VISIBLE "noot noot"
   VISIBLE "HAI" BTW the HAI here is only text
   VISIBLE name
-
-  BTW arithmetic
-  I HAS A total ITZ SUM OF num AN 3
   VISIBLE total
 
   BTW comparison and if-else

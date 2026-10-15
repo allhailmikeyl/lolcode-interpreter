@@ -1,4 +1,3 @@
 HAI
-OBTW
-  this comment never closes
+VISIBLE "hello
 KTHXBYE

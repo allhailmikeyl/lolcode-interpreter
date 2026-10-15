@@ -1,4 +1,6 @@
 HAI
-  I HAS A var ITZ 12
+  WAZZUP
+    I HAS A var ITZ 12
+  BUHBYE
   VISIBLE "noot noot" var
 KTHXBYE

@@ -1,0 +1,6 @@
+HAI
+  BOTH SAEM 1 AN 1
+  O RLY?
+    YA RLY
+      VISIBLE 1
+KTHXBYE
