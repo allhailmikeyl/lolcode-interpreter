@@ -3,9 +3,6 @@ import tkinter as tk
 from tkinter import filedialog, ttk 
 import customtkinter as ctk  # modern UI framework for VS Code aesthetic
 
-# TODO (Milestone 2): Connect parse tree or symbol table rows to self.symbol_tree
-# TODO (Milestone 3): Bind interpreter runtime output and GIMMEH prompt to self.console
-
 try:
     from analyzer import analyze  # bridge to lexer, parser, and symbol logic
 except ImportError:
@@ -17,7 +14,7 @@ ctk.set_default_color_theme("blue")  # base theme (can point to themes/pink.json
 class LOLCodeInterpreterUI(ctk.CTk):
     def __init__(self):
         super().__init__()  # initialize CTk main window
-        self.title("TITLE BAR HERE")  # set window title bar
+        self.title("kids ni sol - LOLCODE Interpreter")  # set window title bar
         self.geometry("1100x750")  # default window dimensions
         self.minsize(900, 600)  # minimum window size constraints
         self.grid_columnconfigure(0, weight=1)  # allow left column (editor) to expand
@@ -34,17 +31,44 @@ class LOLCodeInterpreterUI(ctk.CTk):
     def _setup_styles(self):
         style = ttk.Style()  # access ttk style manager
         style.theme_use("default")  # use default base for reliable color override
-        style.configure("Treeview", background="#252526", foreground="#d4d4d4", fieldbackground="#252526", rowheight=24, borderwidth=0, font=("Consolas", 10))  # dark table body
-        style.configure("Treeview.Heading", background="#333333", foreground="#ffffff", font=("Consolas", 10, "bold"), relief="flat")  # table header styling
+        style.configure(
+            "Treeview", 
+            background="#252526", 
+            foreground="#d4d4d4", 
+            fieldbackground="#252526", 
+            rowheight=24, 
+            borderwidth=0, 
+            font=("Consolas", 10)
+        )  # dark table body
+        style.configure(
+            "Treeview.Heading", 
+            background="#333333", 
+            foreground="#ffffff", 
+            font=("Consolas", 10, "bold"), 
+            relief="flat"
+        )  # table header styling
         style.map("Treeview", background=[("selected", "#B74177")])  # pink selection accent
         style.map("Treeview.Heading", background=[("active", "#444444")])  # active header hover style
 
     def _build_top_bar(self):
         top_frame = ctk.CTkFrame(self, fg_color="transparent")  # container frame for file picker
         top_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=(10, 5))  # place at top grid
-        self.open_btn = ctk.CTkButton(top_frame, text="Open File", width=100, fg_color="#B74177", hover_color="#A01E5C", font=("Consolas", 12, "bold"), command=self.load_file)  # file open trigger
+        self.open_btn = ctk.CTkButton(
+            top_frame, 
+            text="Open File", 
+            width=100, 
+            fg_color="#B74177", 
+            hover_color="#A01E5C", 
+            font=("Consolas", 12, "bold"), 
+            command=self.load_file
+        )  # file open trigger
         self.open_btn.pack(side="left", padx=(0, 10))  # pack button to the left
-        self.file_label = ctk.CTkLabel(top_frame, text="File: (None)", text_color="#858585", font=("Consolas", 11))  # file path label
+        self.file_label = ctk.CTkLabel(
+            top_frame, 
+            text="File: (None)", 
+            text_color="#858585", 
+            font=("Consolas", 11)
+        )  # file path label
         self.file_label.pack(side="left", fill="x")  # pack label next to button
 
     def _build_editor(self):
@@ -52,9 +76,23 @@ class LOLCodeInterpreterUI(ctk.CTk):
         editor_frame.grid(row=1, column=0, sticky="nsew", padx=(10, 5), pady=5)  # place in left column
         editor_frame.grid_rowconfigure(1, weight=1)  # expand editor vertically
         editor_frame.grid_columnconfigure(0, weight=1)  # expand editor horizontally
-        editor_lbl = ctk.CTkLabel(editor_frame, text="CODE EDITOR", font=("Consolas", 11, "bold"), text_color="#d4d4d4")  # editor title header
+        editor_lbl = ctk.CTkLabel(
+            editor_frame, 
+            text="CODE EDITOR", 
+            font=("Consolas", 11, "bold"), 
+            text_color="#d4d4d4"
+        )  # editor title header
         editor_lbl.grid(row=0, column=0, sticky="w", padx=10, pady=(5, 0))  # position label
-        self.editor = ctk.CTkTextbox(editor_frame, font=("Consolas", 12), fg_color="#1e1e1e", text_color="#d4d4d4", wrap="none")  # multiline code editor
+        
+        # Note: ctk.CTkTextbox includes a built-in vertical scrollbar by default
+        self.editor = ctk.CTkTextbox(
+            editor_frame, 
+            font=("Consolas", 12), 
+            fg_color="#1e1e1e", 
+            text_color="#d4d4d4", 
+            wrap="none",
+            activate_scrollbars=True
+        )  # multiline code editor with vertical scroll support
         self.editor.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)  # attach text area
         default_code = "HAI\n  WAZZUP\n    I HAS A var ITZ 12\n  BUHBYE\n  VISIBLE \"noot noot\" var\nKTHXBYE\n"  # initial starter code
         self.editor.insert("1.0", default_code)  # pre-fill editor with LOLCODE sample
@@ -64,38 +102,87 @@ class LOLCodeInterpreterUI(ctk.CTk):
         tables_frame.grid(row=1, column=1, sticky="nsew", padx=(5, 10), pady=5)  # place in right column
         tables_frame.grid_rowconfigure(1, weight=1)  # allow lexeme table to stretch
         tables_frame.grid_rowconfigure(3, weight=1)  # allow symbol table to stretch
-        tables_frame.grid_columnconfigure(0, weight=1)  # stretch column horizontally
-        lex_lbl = ctk.CTkLabel(tables_frame, text="LEXEMES", font=("Consolas", 11, "bold"), text_color="#d4d4d4")  # lexeme header
-        lex_lbl.grid(row=0, column=0, sticky="w", padx=10, pady=(5, 0))  # position lexeme label
+        tables_frame.grid_columnconfigure(0, weight=1)  # stretch table horizontally
+        tables_frame.grid_columnconfigure(1, weight=0)  # fixed width for scrollbar column
+
+        lex_lbl = ctk.CTkLabel(
+            tables_frame, 
+            text="LEXEMES", 
+            font=("Consolas", 11, "bold"), 
+            text_color="#d4d4d4"
+        )  # lexeme header
+        lex_lbl.grid(row=0, column=0, columnspan=2, sticky="w", padx=10, pady=(5, 0))  # span across table and scrollbar
+        
+        # --- (3) Lexeme Table with CTkScrollbar ---
         self.lexeme_tree = ttk.Treeview(tables_frame, columns=("Lexeme", "Classification"), show="headings", height=8)  # 2-column lexeme table
         self.lexeme_tree.heading("Lexeme", text="Lexeme")  # set column 1 title
         self.lexeme_tree.heading("Classification", text="Classification")  # set column 2 title
         self.lexeme_tree.column("Lexeme", width=180, anchor="w")  # set lexeme column properties
         self.lexeme_tree.column("Classification", width=220, anchor="w")  # set classification column properties
-        self.lexeme_tree.grid(row=1, column=0, sticky="nsew", padx=10, pady=(2, 5))  # place lexeme table
-        sym_lbl = ctk.CTkLabel(tables_frame, text="SYMBOL TABLE (Placeholder - M2/M3)", font=("Consolas", 11, "bold"), text_color="#d4d4d4")  # symbol table label
-        sym_lbl.grid(row=2, column=0, sticky="w", padx=10, pady=(5, 0))  # position symbol label
+        self.lexeme_tree.grid(row=1, column=0, sticky="nsew", padx=(10, 0), pady=(2, 5))  # place lexeme table
+        
+        self.lexeme_scroll = ctk.CTkScrollbar(tables_frame, command=self.lexeme_tree.yview)  # dark-themed vertical scrollbar
+        self.lexeme_scroll.grid(row=1, column=1, sticky="ns", padx=(2, 10), pady=(2, 5))  # place scrollbar beside lexeme table
+        self.lexeme_tree.configure(yscrollcommand=self.lexeme_scroll.set)  # link treeview scrolling to scrollbar
+
+        # --- (4) Symbol Table Placeholder with CTkScrollbar ---
+        # TODO (Milestone 2): Hook self.symbol_tree up to dynamic AST symbol table generation from analyzer.py / symbols.py
+        sym_lbl = ctk.CTkLabel(
+            tables_frame, 
+            text="SYMBOL TABLE (Placeholder - M2/M3)", 
+            font=("Consolas", 11, "bold"), 
+            text_color="#d4d4d4"
+        )  # symbol table label
+        sym_lbl.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=(5, 0))  # span across table and scrollbar
+        
         self.symbol_tree = ttk.Treeview(tables_frame, columns=("Identifier", "Value"), show="headings", height=6)  # 2-column symbol table placeholder
         self.symbol_tree.heading("Identifier", text="Identifier")  # set column 1 title
         self.symbol_tree.heading("Value", text="Value")  # set column 2 title
         self.symbol_tree.column("Identifier", width=180, anchor="w")  # set identifier column properties
         self.symbol_tree.column("Value", width=220, anchor="w")  # set value column properties
-        self.symbol_tree.grid(row=3, column=0, sticky="nsew", padx=10, pady=(2, 10))  # place symbol table
+        self.symbol_tree.grid(row=3, column=0, sticky="nsew", padx=(10, 0), pady=(2, 10))  # place symbol table
+
+        self.symbol_scroll = ctk.CTkScrollbar(tables_frame, command=self.symbol_tree.yview)  # dark-themed vertical scrollbar
+        self.symbol_scroll.grid(row=3, column=1, sticky="ns", padx=(2, 10), pady=(2, 10))  # place scrollbar beside symbol table
+        self.symbol_tree.configure(yscrollcommand=self.symbol_scroll.set)  # link treeview scrolling to scrollbar
 
     def _build_execute_bar(self):
         exec_frame = ctk.CTkFrame(self, fg_color="transparent")  # container for run bar
         exec_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=10, pady=(5, 2))  # place between editor and console
-        self.exec_btn = ctk.CTkButton(exec_frame, text="EXECUTE / RUN", fg_color="#B74177", hover_color="#A01E5C", font=("Consolas", 13, "bold"), height=32, command=self.run_code)  # execute button
+        self.exec_btn = ctk.CTkButton(
+            exec_frame, 
+            text="EXECUTE / RUN", 
+            fg_color="#B74177", 
+            hover_color="#A01E5C", 
+            font=("Consolas", 13, "bold"), 
+            height=32, 
+            command=self.run_code
+        )  # execute button
         self.exec_btn.pack(fill="x")  # stretch button across full width
 
     def _build_console(self):
+        # TODO (Milestone 3): Route runtime evaluation (VISIBLE) and interactive user input (GIMMEH) into console
         console_frame = ctk.CTkFrame(self, corner_radius=6)  # container frame for terminal output
         console_frame.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=10, pady=(2, 10))  # place at bottom grid
         console_frame.grid_rowconfigure(1, weight=1)  # expand console vertically
         console_frame.grid_columnconfigure(0, weight=1)  # expand console horizontally
-        console_lbl = ctk.CTkLabel(console_frame, text="CONSOLE OUTPUT", font=("Consolas", 11, "bold"), text_color="#d4d4d4")  # console label
+        console_lbl = ctk.CTkLabel(
+            console_frame, 
+            text="CONSOLE OUTPUT", 
+            font=("Consolas", 11, "bold"), 
+            text_color="#d4d4d4"
+        )  # console label
         console_lbl.grid(row=0, column=0, sticky="w", padx=10, pady=(5, 0))  # position console label
-        self.console = ctk.CTkTextbox(console_frame, font=("Consolas", 11), fg_color="#181818", text_color="#cccccc", state="disabled")  # read-only console textbox
+        
+        # Note: ctk.CTkTextbox handles vertical scrolling automatically
+        self.console = ctk.CTkTextbox(
+            console_frame, 
+            font=("Consolas", 11), 
+            fg_color="#181818", 
+            text_color="#cccccc", 
+            state="disabled",
+            activate_scrollbars=True
+        )  # read-only console textbox with auto vertical scrollbar
         self.console.grid(row=1, column=0, sticky="nsew", padx=10, pady=(2, 10))  # position console textbox
 
     def load_file(self):
@@ -111,6 +198,7 @@ class LOLCodeInterpreterUI(ctk.CTk):
     def write_console(self, text):
         self.console.configure(state="normal")  # enable textbox for editing
         self.console.insert("end", text)  # append message to console
+        self.console.see("end")  # automatically autoscroll to latest output
         self.console.configure(state="disabled")  # disable to maintain read-only state
 
     def run_code(self):
@@ -155,5 +243,5 @@ class LOLCodeInterpreterUI(ctk.CTk):
             self.write_console("Lexical and syntax analysis successful.\n")  # print success status in console
 
 if __name__ == "__main__":
-    app = LOLCodeInterpreterUI()  # instantiate window instance[cite: 3]
+    app = LOLCodeInterpreterUI()  # instantiate window instance
     app.mainloop()  # start the Tkinter event loop
