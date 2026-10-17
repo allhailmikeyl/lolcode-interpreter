@@ -4,6 +4,9 @@
 # It checks the order of the tokens (HAI ... KTHXBYE, statements, expressions), not what the program does when it runs
 # Each rule is parse_x(tokens, pos): return (node, new_pos), or raise a ParseError with the line number if the tokens do not fit
 
+# Imports
+from symbols import SymbolTable
+
 """
 NODE NAMES
   literal           leaf("NUMBR", "12")  leaf("NUMBAR", "3.14")  leaf("YARN", "text")  leaf("TROOF", "WIN")
@@ -469,37 +472,6 @@ def parse_gtfo(tokens, pos):
 # (parse_program does that).
 def parse_func_def(tokens, pos):
     not_written(tokens, pos, "parse_func_def")
-
-# Class to hold the symbol table, which maps variable names to their values.
-class SymbolTable:
-    def __init__(self):
-        self.table = {} # Maps an identifier to its value
-        self.table["IT"] = None # The sample UI shows IT in the symbol table
-
-    # True if the identifier has been declared
-    def exists(self, name):
-        return name in self.table
-
-    # Adds a new identifier (with an optional starting value)
-    def declare(self, name, value=None):
-        self.table[name] = value
-
-    # Gives the value stored for an identifier
-    def lookup(self, name):
-        if name in self.table:
-            return self.table[name]
-        return None
-
-    # Changes the value stored for an identifier
-    def assign(self, name, value):
-        self.table[name] = value
-
-    # Gives a list of (identifier, value)
-    def rows(self):
-        result = []
-        for name in self.table: # Go through every identifier
-            result.append((name, self.table[name]))
-        return result
 
 # Walk the tree returned by parse() and declare every variable it finds.
 # Look for nodes named "VARIABLE". Their children are a leaf "Identifier" and an
